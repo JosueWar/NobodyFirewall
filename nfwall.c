@@ -1,11 +1,11 @@
-/***********************************
- *         Nobody Firewall         *
- *                                 *
- *   @Author:    Nobody            *
- *   @Version:   0.1 BETA FIX #2   *
- *   @Date:      26/08/2017        *
- *                                 *
- * Thanks to Silver Moon & n3ptun0 *
+/********************************************************
+ *         Nobody Firewall         						*
+ *                                 						*
+ *   @Author:    JosueWar            					*
+ *   @Version:   0.1 BETA FIX #3   						*
+ *   @Date:      1/02/2022        						*
+ *                                 						*
+ * Thanks to Silver Moon & n3ptun0 & Nobody (github) 	*
  **********************************/
 
 /* ==================================== [ INCLUDES ] ==================================== */
@@ -24,10 +24,10 @@
 
 /* ==================================== [ DEFINES ] ==================================== */
 //#define FLAG_DEBUG
-#define	FIREWALL_VERSION "0.1 BETA"
+#define	FIREWALL_VERSION "0.2 BETA"
 #define SLEEP_SECONDS	 (1)
-#define MAX_QUERIES		 (60) // per SLEEP_SECONDS
-#define MAX_COOKIES		 (5) // per SLEEP_SECONDS
+#define MAX_QUERIES 	(100) // per SLEEP_SECONDS
+#define MAX_COOKIES 	(20) // per SLEEP_SECONDS
 #define	STRUCT_NUMBER	 (700)
 
 typedef unsigned int uint;
@@ -226,6 +226,25 @@ void Ban(char* host, u_short port, u_short dst_port, int type)
 		printf("[!] Unable to open log file.\n");
 	fprintf(logfile, "[%02d/%02d/%02d - %02d:%02d:%02d] %s", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, buffer);
 	fclose(logfile);
+	//Check if ip is already blocked
+	FILE *p;
+    char ch;
+    int c=0,n=0;char l;
+    char grepcmd[50];
+    sprintf(grepcmd, "iptables -L -n | grep %s", host);
+    p = popen(grepcmd,"r");
+
+    while((c = fgetc(p)) != EOF){
+        if( c == '\n')
+            n++;
+        //putchar(c);
+    }
+    pclose(p);
+    if ( n != 0)
+    	printf("[!] %s is already blocked", host);
+    	return;
+
+
 	char cmd[50];
 	memset(cmd, 0, sizeof(cmd));
 	sprintf(cmd, "iptables -A INPUT -s %s -j DROP", host);
